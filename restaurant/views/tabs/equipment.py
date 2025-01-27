@@ -14,7 +14,7 @@ class ExpandableItem:
             row = ft.Row(
                 [
                     ft.Text(option, color='white'),
-                    ft.ElevatedButton("Включить", on_click=lambda e, opt=option: self.enable_option(opt)),
+                    ft.ElevatedButton('Включить', on_click=lambda e, opt=option: self.enable_option(opt)),
                 ],
                 alignment=ft.MainAxisAlignment.END,
                 height=50
@@ -41,9 +41,7 @@ class ExpandableItem:
             border_radius=20,
         )
 
-        # Устанавливаем обработчик клика на строку элемента
         item_row.on_click = lambda e: self.toggle_expansion(e, option_column)
-
         return ft.Column([item_row, option_column])
 
     def toggle_expansion(self, e, option_column):
@@ -55,7 +53,6 @@ class ExpandableItem:
 
 
 def equipment(page: ft.Page):
-    page.title = "Расширяемые элементы с опциями"
     page.window.width = 390
     page.window.height = 844
     page.window.always_on_top = True
@@ -67,7 +64,6 @@ def equipment(page: ft.Page):
 
     page.horizontal_alignment = 'center'
 
-    # Создание ListView с контролами
     list_view = ft.ListView(
         spacing=10,
         controls=[
@@ -81,8 +77,7 @@ def equipment(page: ft.Page):
     return ft.View(
         route='/user_mainscreen',
         bgcolor='#000000',
-        vertical_alignment=ft.MainAxisAlignment.CENTER,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-        controls=[list_view],  # Тут мы вставляем наш ListView
-    )
 
+        controls=[ft.Container(height=150, bgcolor='black'), list_view], spacing=0
+    )

@@ -1,58 +1,7 @@
 import flet as ft
+from datetime import datetime
 
-
-class ContextMenuItem:
-    DEFAULT_ACTIONS = [
-        {
-            'text': "Action 1",
-            'is_default': True,
-            'trailing_icon': ft.Icons.CHECK,
-            'callback': lambda e: print("Action 1"),
-        },
-        {
-            'text': "Action 2",
-            'trailing_icon': ft.Icons.MORE,
-            'callback': lambda e: print("Action 2"),
-        },
-        {
-            'text': "Action 3",
-            'is_destructive': True,
-            'trailing_icon': ft.Icons.CANCEL,
-            'callback': lambda e: print("Action 3"),
-        },
-    ]
-
-    def __init__(self, title, actions=None):
-        self.title = title  # Заголовок элемента
-        self.actions = actions if actions is not None else self.DEFAULT_ACTIONS
-
-
-    def create(self):
-        return ft.CupertinoContextMenu(
-            enable_haptic_feedback=True,
-            content=ft.Container(
-                ft.Text(self.title, size=40, color='white'),
-                width=200,
-                height=150,
-                bgcolor='#202020',
-                alignment=ft.alignment.center,
-                border_radius=20
-            ),
-            actions=self.create_actions()
-        )
-
-    def create_actions(self):
-        action_items = []
-        for action in self.actions:
-            action_items.append(
-                ft.CupertinoContextMenuAction(
-                    text=action['text'],
-                    is_default_action=action.get('is_default', False),
-                    trailing_icon=action.get('trailing_icon', ft.Icons.MORE),
-                    on_click=action['callback']
-                )
-            )
-        return action_items
+today = datetime.today().date().strftime('%d.%m.%Y')
 
 
 def reservation(page):
@@ -63,41 +12,79 @@ def reservation(page):
     page.window.resizable = False
     page.padding = 0
     page.spacing = 0
-    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-    page.vertical_alignment = ft.MainAxisAlignment.CENTER
 
-    itms = [ContextMenuItem(title=f'Item {i}').create() for i in range(1, 13)]
+    def handle_dlg_action_clicked(e):
+        page.close(dlg)
+        dlg.data.confirm_dismiss(e.control.data)
 
-    custom_actions = [
-        {
-            'text': "Custom Action 1",
-            'trailing_icon': ft.Icons.ADD,
-            'callback': lambda e: print("Custom Action 1"),
-        },
-        {
-            'text': "Custom Action 2",
-            'is_destructive': True,
-            'trailing_icon': ft.Icons.REMOVE,
-            'callback': lambda e: print("Custom Action 2"),
-        },
-    ]
+    dlg = ft.CupertinoAlertDialog(
+        modal=True,
+        title=ft.Text("Пожалуйста, подтвердите"),
+        content=ft.Text("Вы действительно хотите отменить бронь?"),
 
-    lw = ft.ListView(
-        controls=itms,
-
-        spacing=10,
-        width=360,
-        first_item_prototype=True,
-        height=635,
+        actions=[
+            ft.CupertinoButton("Да", data=True, on_click=handle_dlg_action_clicked, color='red'),
+            ft.CupertinoButton("Нет", data=False, on_click=handle_dlg_action_clicked, color='#36618e'),
+        ],
     )
 
-    lw.controls.append(ft.Container(height=1))
+    def handle_confirm_dismiss(e: ft.DismissibleDismissEvent):
+        if e.direction == ft.DismissDirection.END_TO_START:  # right-to-left slide
+            # save current dismissible to dialog's data, for confirmation in handle_dlg_action_clicked
+            dlg.data = e.control
+            page.open(dlg)
+        else:  # left-to-right slide
+            e.control.confirm_dismiss(True)
 
+    def handle_dismiss(e):
+        e.control.parent.controls.remove(e.control)
+        page.update()
+
+    def handle_update(e: ft.DismissibleUpdateEvent):
+        print(
+            f"dir: {e.direction}, progress: {e.progress}, reached: {e.reached}, previous_reached: {e.previous_reached}"
+        )
+
+    lww = ft.ListView(
+            expand=True,
+            controls=[
+                ft.Dismissible(
+                    content=ft.ListTile(
+                        title=ft.Container(
+                            content=ft.Text(f"Бронь {today} - {i}", color='#36618e', size=25),
+                            alignment=ft.alignment.center,
+                            bgcolor='#ffffff',
+                            height=75,
+                            padding=0,
+                        )
+                    ),
+                    dismiss_direction=ft.DismissDirection.HORIZONTAL,
+                    background=ft.Container(bgcolor='#2bff88'),
+                    secondary_background=ft.Container(bgcolor=ft.colors.RED),
+                    on_dismiss=handle_dismiss,
+                    on_update=handle_update,
+                    on_confirm_dismiss=handle_confirm_dismiss,
+                    dismiss_thresholds={
+                        ft.DismissDirection.END_TO_START: 0.2,
+                        ft.DismissDirection.START_TO_END: 0.2,
+                    }
+                )
+                for i in range(1, 25)
+            ],
+            spacing=10,
+            width=360,
+            first_item_prototype=True,
+            height=635
+        )
 
     return ft.View(
         route='/user_mainscreen',
-        bgcolor='#000000',
+        bgcolor='#ffffff',
         vertical_alignment=ft.MainAxisAlignment.CENTER,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-        controls=[ft.Container(height=150), lw, ft.Container(height=10)],
+
+        controls=[ft.Container(height=150), lww, ft.Container(height=10)]
     )
+
+
+

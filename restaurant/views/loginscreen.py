@@ -83,25 +83,25 @@ def login_screen(page: ft.Page):
         width=300,
         border_radius=10,
         prefix_text='+7 ',
-        label_style=ft.TextStyle(color='white', size=20, font_family='SteppeThin'),
-        text_style=ft.TextStyle(color='white', size=20, font_family='SteppeRegular'),
-        prefix_style=ft.TextStyle(color='white', size=20, font_family='SteppeRegular'),
+        label_style=ft.TextStyle(color='#36618e', size=20, font_family='SteppeThin'),
+        text_style=ft.TextStyle(color='#36618e', size=20, font_family='SteppeRegular'),
+        prefix_style=ft.TextStyle(color='#36618e', size=20, font_family='SteppeRegular'),
         error_style=ft.TextStyle(color='red', size=15, font_family='SteppeSemiBold'),
         adaptive=True,
-        border=ft.InputBorder.OUTLINE,
-        fill_color='#202020',
+        border=ft.InputBorder.UNDERLINE,
+        fill_color='#FFFFFF',
         input_filter=ft.InputFilter(allow=True, regex_string=r"^[0-9()\- ]*$", replacement_string=""),
         on_change=format_phone,
         on_blur=phone_blur, on_focus=phone_focus
     )
 
     password = ft.TextField(label="Пароль", width=300, border_radius=10, password=True, can_reveal_password=True,
-                            label_style=ft.TextStyle(color='white', size=20, font_family='SteppeThin'),
-                            text_style=ft.TextStyle(color='white', size=20, font_family='SteppeRegular'),
-                            prefix_style=ft.TextStyle(color='white', size=20, font_family='SteppeRegular'),
+                            label_style=ft.TextStyle(color='#36618e', size=20, font_family='SteppeThin'),
+                            text_style=ft.TextStyle(color='#36618e', size=20, font_family='SteppeRegular'),
+                            prefix_style=ft.TextStyle(color='#36618e', size=20, font_family='SteppeRegular'),
                             error_style=ft.TextStyle(color='red', size=15, font_family='SteppeSemiBold'),
                             on_focus=password_focus, on_blur=password_blur,
-                            border=ft.InputBorder.OUTLINE, fill_color='#202020', adaptive=True,
+                            border=ft.InputBorder.UNDERLINE, fill_color='#FFFFFF', adaptive=True,
                             )
 
     mybarx = ft.Container(
@@ -121,28 +121,29 @@ def login_screen(page: ft.Page):
     def go_to_welcome(e):
 
         # phone
-        if len(phone.value) == 0:
-            phone.error_text = 'Введите номер'
-        elif 1 <= len(phone.value) < 14:
-            phone.error_text = 'Неверный формат номера'
+        # if len(phone.value) == 0:
+        #     phone.error_text = 'Введите номер'
+        # elif 1 <= len(phone.value) < 14:
+        #     phone.error_text = 'Неверный формат номера'
+        #
+        # # password
+        # if len(password.value) == 0:
+        #     password.error_text = 'Введите пароль'
+        # elif 1 <= len(password.value) < 8:
+        #     password.error_text = 'Слишком короткий пароль!'
+        # elif not re.search(r'[0-9]', password.value):
+        #     password.error_text = 'В пароле должна быть цифра!'
+        # elif not re.search(r'[A-Z]', password.value):
+        #     password.error_text = 'А заглавная буква?'
+        # elif not re.search(r'[a-z]', password.value):
+        #     password.error_text = 'А маленькая буква?'
+        # elif not re.search(r'[.@#$%/^&+=?!,]', password.value):
+        #     password.error_text = 'А спец. символ? (.@#$%/^&+=?!,)'
+        #
+        # else:
+        #     print(f'user: +7{phone.value.replace("(", "").replace(")", "").replace("-", "").replace(" ", "")}'),
+        #     print(f'password: {password.value}')
 
-        # password
-        if len(password.value) == 0:
-            password.error_text = 'Введите пароль'
-        elif 1 <= len(password.value) < 8:
-            password.error_text = 'Слишком короткий пароль!'
-        elif not re.search(r'[0-9]', password.value):
-            password.error_text = 'В пароле должна быть цифра!'
-        elif not re.search(r'[A-Z]', password.value):
-            password.error_text = 'А заглавная буква?'
-        elif not re.search(r'[a-z]', password.value):
-            password.error_text = 'А маленькая буква?'
-        elif not re.search(r'[.@#$%/^&+=?!,]', password.value):
-            password.error_text = 'А спец. символ? (.@#$%/^&+=?!,)'
-
-        else:
-            print(f'user: +7{phone.value.replace("(", "").replace(")", "").replace("-", "").replace(" ", "")}'),
-            print(f'password: {password.value}')
             page.go("/user_mainscreen")
 
     btn = ft.Container(
@@ -169,4 +170,4 @@ def login_screen(page: ft.Page):
 
     return ft.View(
             "/",
-            [main_container], bgcolor='#000000')
+            [main_container], bgcolor='#FFFFFF', padding=0)

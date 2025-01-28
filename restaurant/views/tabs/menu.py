@@ -5,7 +5,7 @@ import datetime
 def menu(page: ft.Page):
     return ft.View(
         route='/user_mainscreen',
-        bgcolor='#000000',
+        bgcolor='#FFFFFF',
         vertical_alignment=ft.MainAxisAlignment.CENTER,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         controls=[ft.Text('menu', color='black', size=30)],

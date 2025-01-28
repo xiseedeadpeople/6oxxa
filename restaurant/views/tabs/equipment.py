@@ -13,8 +13,8 @@ class ExpandableItem:
         for option in self.options:
             row = ft.Row(
                 [
-                    ft.Text(option, color='white'),
-                    ft.ElevatedButton('Включить', on_click=lambda e, opt=option: self.enable_option(opt)),
+                    ft.Text(option, color='black'),
+                    ft.ElevatedButton('Включить', color='black', bgcolor='#2bff88', on_click=lambda e, opt=option: self.enable_option(opt)),
                 ],
                 alignment=ft.MainAxisAlignment.END,
                 height=50
@@ -24,9 +24,9 @@ class ExpandableItem:
         item_row = ft.Container(
             content=ft.Row(
                 [
-                    ft.Text(self.name, color='white'),
+                    ft.Text(self.name, color='#36618e', size=20),
                     ft.IconButton(
-                        icon=ft.icons.ADD,
+                        icon=ft.icons.EXPAND_MORE,
                         on_click=lambda e: self.toggle_expansion(e, option_column),
                         data=option_column,
                     ),
@@ -35,7 +35,7 @@ class ExpandableItem:
                 height=60,
             ),
             padding=10,
-            bgcolor='#202020',
+            bgcolor='#f2f3fa',
             width=350,
             height=150,
             border_radius=20,
@@ -76,8 +76,8 @@ def equipment(page: ft.Page):
 
     return ft.View(
         route='/user_mainscreen',
-        bgcolor='#000000',
+        bgcolor='#FFFFFF',
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
 
-        controls=[ft.Container(height=150, bgcolor='black'), list_view], spacing=0
+        controls=[ft.Container(height=150, bgcolor='#FFFFFF'), list_view], spacing=0
     )

@@ -1,6 +1,7 @@
+from prefs import colors
 import flet as ft
-from flet_core.border_radius import vertical
 import re
+
 
 
 def login_screen(page: ft.Page):
@@ -73,46 +74,56 @@ def login_screen(page: ft.Page):
     def on_button_click(e):
         print(f'passforgot_btn triggered.')
 
-    # Создаем текстовую кнопку
-    passforgot_btn = ft.TextButton(
-        text="Забыли пароль?",
-        on_click=on_button_click)
+    passforgot_btn = ft.CupertinoButton(
+        content=ft.Container(ft.Text('Забыли пароль?',
+                                     style=ft.TextStyle(color=colors['inv_primarytext'], size=20,
+                                                        font_family='SteppeThin',
+                                                        shadow=ft.BoxShadow(color=colors['inv_fontshadow'],
+                                                        spread_radius=1000, offset=(0, 0), blur_radius=1,
+                                                        blur_style=ft.ShadowBlurStyle.OUTER)))),
+        on_click=lambda e: print(f'forgot pass trigg'))
 
     phone = ft.TextField(
         label='Номер телефона',
         width=300,
         border_radius=10,
         prefix_text='+7 ',
-        label_style=ft.TextStyle(color='#36618e', size=20, font_family='SteppeThin'),
-        text_style=ft.TextStyle(color='#36618e', size=20, font_family='SteppeRegular'),
-        prefix_style=ft.TextStyle(color='#36618e', size=20, font_family='SteppeRegular'),
-        error_style=ft.TextStyle(color='red', size=15, font_family='SteppeSemiBold'),
+        label_style=ft.TextStyle(color=colors['primary'], size=20, font_family='SteppeThin', shadow=ft.BoxShadow(color='#307849')),
+        text_style=ft.TextStyle(color=colors['primary'], size=20, font_family='SteppeRegular'),
+        prefix_style=ft.TextStyle(color=colors['primary'], size=20, font_family='SteppeRegular'),
+        error_style=ft.TextStyle(color=colors['error'], size=15, font_family='SteppeSemiBold'),
         adaptive=True,
         border=ft.InputBorder.UNDERLINE,
-        fill_color='#FFFFFF',
+        fill_color=colors['bg'],
         input_filter=ft.InputFilter(allow=True, regex_string=r"^[0-9()\- ]*$", replacement_string=""),
         on_change=format_phone,
         on_blur=phone_blur, on_focus=phone_focus
     )
 
     password = ft.TextField(label="Пароль", width=300, border_radius=10, password=True, can_reveal_password=True,
-                            label_style=ft.TextStyle(color='#36618e', size=20, font_family='SteppeThin'),
-                            text_style=ft.TextStyle(color='#36618e', size=20, font_family='SteppeRegular'),
-                            prefix_style=ft.TextStyle(color='#36618e', size=20, font_family='SteppeRegular'),
-                            error_style=ft.TextStyle(color='red', size=15, font_family='SteppeSemiBold'),
+                            label_style=ft.TextStyle(color=colors['primary'], size=20, font_family='SteppeThin'),
+                            text_style=ft.TextStyle(color=colors['primary'], size=20, font_family='SteppeRegular'),
+                            prefix_style=ft.TextStyle(color=colors['primary'], size=20, font_family='SteppeRegular'),
+                            error_style=ft.TextStyle(color=colors['error'], size=15, font_family='SteppeSemiBold'),
                             on_focus=password_focus, on_blur=password_blur,
-                            border=ft.InputBorder.UNDERLINE, fill_color='#FFFFFF', adaptive=True,
+                            border=ft.InputBorder.UNDERLINE, fill_color=colors['bg'], adaptive=True,
                             )
 
     mybarx = ft.Container(
         gradient=ft.LinearGradient(begin=ft.alignment.top_left,
                                    end=ft.alignment.bottom_right,
-                                   colors=['#36618e', '#2bff88']),
+                                   colors=colors['gradient']),
 
         border_radius=ft.border_radius.vertical(bottom=30),
-        shadow=ft.BoxShadow(spread_radius=3, blur_radius=100, color='#2bff88'),
+        shadow=ft.BoxShadow(spread_radius=3, blur_radius=50, color=colors['second_shadow']),
         width=page.window.width, height=150, alignment=ft.alignment.center,
-        content=ft.Container(ft.Text('"xxc', size=35, color='white', font_family='SteppeBlack'))
+        content=ft.Container(ft.Text('vxxc',
+                                     style=ft.TextStyle(color=colors['inv_primarytext'], size=100,
+                                                        font_family='SteppeThin',
+                                                        shadow=ft.BoxShadow(color=colors['inv_fontshadow'],
+                                                        spread_radius=1000,
+                                                        offset=(0, 0), blur_radius=1,
+                                                        blur_style=ft.ShadowBlurStyle.OUTER))))
     )
 
     default_users = {}
@@ -143,25 +154,31 @@ def login_screen(page: ft.Page):
         # else:
         #     print(f'user: +7{phone.value.replace("(", "").replace(")", "").replace("-", "").replace(" ", "")}'),
         #     print(f'password: {password.value}')
-
             page.go("/user_mainscreen")
 
     btn = ft.Container(
-        ft.Text('ВОЙТИ', size=20, color='white', font_family='SteppeSemiBold'),
+        ft.Text('ВОЙТИ',
+                style=ft.TextStyle(color=colors['primary'], size=20, font_family='SteppeThin',
+                                   shadow=ft.BoxShadow(color=colors['font_shadow'],
+                                                       spread_radius=10,
+                                                       offset=(0, 0), blur_radius=4,
+                                                       blur_style=ft.ShadowBlurStyle.OUTER))),
+
         width=300, height=50, on_click=go_to_welcome, border_radius=20, alignment=ft.alignment.center,
-        shadow=ft.BoxShadow(spread_radius=3, blur_radius=5, color='#36618e'),
+        shadow=ft.BoxShadow(spread_radius=3, blur_radius=50, color=colors['second_shadow']),
 
         gradient=ft.LinearGradient(
             begin=ft.alignment.top_left,
             end=ft.alignment.bottom_right,
-            colors=['#2bff88', '#36618e']))
+            colors=colors['gradient']))
 
     main_container = ft.Column(
         controls=[
             mybarx,
             ft.Container(height=150),
             ft.Column(controls=[phone, ft.Column([password, passforgot_btn],
-                                                 spacing=0, horizontal_alignment=ft.CrossAxisAlignment.END), btn],
+                                spacing=0, horizontal_alignment=ft.CrossAxisAlignment.END),btn],
+
                       spacing=30, alignment=ft.alignment.center)
         ],
         alignment=ft.MainAxisAlignment.CENTER,
@@ -170,4 +187,4 @@ def login_screen(page: ft.Page):
 
     return ft.View(
             "/",
-            [main_container], bgcolor='#FFFFFF', padding=0)
+            [main_container], bgcolor=colors['bg'], padding=0)

@@ -1,20 +1,39 @@
 import flet as ft
+from prefs.colors import colors, style
 
 
 class ExpandableItem:
     def __init__(self, name, options):
         self.name = name
         self.options = options
+        self.buttons = {}
 
     def create(self):
         option_column = ft.Column(visible=False)
 
-        # options customization
+
         for option in self.options:
+            button_text = ft.Text('Включить', style=style(size=12))
+            button_container = ft.Container(
+                content=ft.Row(
+                    [button_text],
+                    alignment=ft.MainAxisAlignment.CENTER
+                ),
+                bgcolor=colors['bg'],
+                shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=colors['block_shadow']),
+                padding=10,
+                border_radius=5,
+                width=100,
+                height=33,
+                on_click=lambda e, opt=option, btn_text=button_text: self.toggle_option(opt, btn_text)
+            )
+
+            self.buttons[option] = button_text
+
             row = ft.Row(
                 [
-                    ft.Text(option, color='black'),
-                    ft.ElevatedButton('Включить', color='black', bgcolor='#2bff88', on_click=lambda e, opt=option: self.enable_option(opt)),
+                    ft.Text(option, style=style(size=12)),
+                    button_container
                 ],
                 alignment=ft.MainAxisAlignment.END,
                 height=50
@@ -24,18 +43,21 @@ class ExpandableItem:
         item_row = ft.Container(
             content=ft.Row(
                 [
-                    ft.Text(self.name, color='#36618e', size=20),
+                    ft.Text(self.name, style=style(size=15)),
                     ft.IconButton(
                         icon=ft.icons.EXPAND_MORE,
+                        icon_color=colors['primary'],
                         on_click=lambda e: self.toggle_expansion(e, option_column),
                         data=option_column,
                     ),
                 ],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 height=60,
+
             ),
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=colors['block_shadow']),
             padding=10,
-            bgcolor='#f2f3fa',
+            bgcolor=colors['bg'],
             width=350,
             height=150,
             border_radius=20,
@@ -44,40 +66,32 @@ class ExpandableItem:
         item_row.on_click = lambda e: self.toggle_expansion(e, option_column)
         return ft.Column([item_row, option_column])
 
-    def toggle_expansion(self, e, option_column):
+    @staticmethod
+    def toggle_expansion(e, option_column):
         option_column.visible = not option_column.visible
         e.page.update()
 
-    def enable_option(self, option):
-        print(f"Опция '{option}' включена!")
+
+    @staticmethod
+    def toggle_option(option, button_text):
+        if button_text.value == 'Включить':
+            button_text.value = 'Выключить'
+        else:
+            button_text.value = 'Включить'
+        button_text.update()
 
 
 def equipment(page: ft.Page):
-    page.window.width = 390
-    page.window.height = 844
-    page.window.always_on_top = True
-    page.window.maximizable = False
-    page.window.resizable = False
-    page.bgcolor = 'black'
-    page.padding = 20
-    page.spacing = 20
-
     page.horizontal_alignment = 'center'
 
     list_view = ft.ListView(
         spacing=10,
-        controls=[
-            item.create() for item in [
-                ExpandableItem('Кухня', ['Умный холодильник', 'Умная плита', 'Системы управления запасами']),
-                ExpandableItem('Безопасность и контроль', ['Камеры', 'Температура холодильника'])
-            ]
-        ]
+        controls=[ExpandableItem('Кухня', ['Умный холодильник', 'Умная плита', 'Системы управления запасами']).create(),
+                  ExpandableItem('Безопасность и контроль', ['Камеры', 'Температура холодильника']).create()]
     )
 
     return ft.View(
         route='/user_mainscreen',
-        bgcolor='#FFFFFF',
+        bgcolor=colors['bg'],
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-
-        controls=[ft.Container(height=150, bgcolor='#FFFFFF'), list_view], spacing=0
-    )
+        controls=[ft.Container(height=150, bgcolor=colors['bg']), list_view], spacing=0)

@@ -1,155 +1,210 @@
 import flet as ft
-import threading
+from prefs.colors import colors, style, error_style
+from db import get_db, Staff
+import re
 
 class ContextMenuItem:
-    DEFAULT_ACTIONS = [
-        {
-            'text': "Выдать премию",
-            'is_default': True,
-            'trailing_icon': ft.icons.ATTACH_MONEY,
-            'callback': None,  # Установим как None, позже обновим
-        },
-        {
-            'text': "Выдать штраф",
-            'is_default': True,
-            'trailing_icon': ft.icons.MONEY_OFF,
-            'callback': None,  # Установим как None, позже обновим
-        },
-        {
-            'text': "Повысить",
-            'trailing_icon': ft.icons.WORKSPACE_PREMIUM,
-            'callback': None,  # Установим как None, позже обновим
-        },
-        {
-            'text': "Уволить",
-            'is_destructive': True,
-            'trailing_icon': ft.icons.INDETERMINATE_CHECK_BOX,
-            'callback': None,
-        },
-    ]
-
-    def __init__(self, title, actions=None, index=None, lw=None, remove_callback=None, page=None):
+    def __init__(self, title, index, remove_callback, page):
         self.title = title
-        self.actions = actions if actions is not None else self.DEFAULT_ACTIONS
         self.index = index
-        self.lw = lw
         self.remove_callback = remove_callback
-        self.page = page  # Сохраняем ссылку на страницу
+        self.page = page
 
-        # Устанавливаем колбэки для действий
-        self.actions[0]['callback'] = self.create_award_callback()
-        self.actions[1]['callback'] = self.create_fine_callback()
-        self.actions[2]['callback'] = self.create_promote_callback()
+    def show_snackbar(self, message, sstyle=style(size=15, color=colors['primary'])):
+        snackbar = ft.SnackBar(
+            ft.Container(ft.Text(message, style=sstyle), alignment=ft.alignment.center),
+            open=True, bgcolor=colors['bg'], duration=1000
+        )
+        self.page.overlay.append(snackbar)
+        self.page.update()
 
-        if self.remove_callback is not None:
-            self.actions[-1]['callback'] = self.create_remove_callback()
-
-    def create_award_callback(self):
-        def award_employee(e):
-            new_snack_bar = ft.SnackBar(ft.Text('Сотрудник получил премию (1000₽)'),
-                                        open=True, bgcolor='#4caf50', duration=1000)
-            self.page.overlay.append(new_snack_bar)
-            self.page.update()
-
-        return award_employee
-
-    def create_fine_callback(self):
-        def fine_employee(e):
-            new_snack_bar = ft.SnackBar(ft.Text('Сотрудник получил штраф.'),
-                                        open=True, bgcolor='#f44336', duration=1000)
-            self.page.overlay.append(new_snack_bar)
-            self.page.update()
-        return fine_employee
-
-    def create_promote_callback(self):
-        def promote_employee(e):
-            new_snack_bar = ft.SnackBar(ft.Text('Сотрудник повышен.'),
-                                        open=True, bgcolor='#2196F3', duration=1000)
-            self.page.overlay.append(new_snack_bar)
-            self.page.update()
-        return promote_employee
-
-    def create_remove_callback(self):
-        def remove_employee(e):
-            if self.remove_callback is not None:
-                self.remove_callback(self.index)
-        return remove_employee
+    def generate_actions(self):
+        return [
+            ft.CupertinoContextMenuAction(
+                text='Выдать премию',
+                is_default_action=True,
+                trailing_icon=ft.icons.ATTACH_MONEY,
+                on_click=lambda e: self.show_snackbar('Выдана премия (1000₽)')
+            ),
+            ft.CupertinoContextMenuAction(
+                text='Повысить',
+                trailing_icon=ft.icons.WORKSPACE_PREMIUM,
+                on_click=lambda e: self.show_snackbar('Сотрудник повышен.')
+            ),
+            ft.CupertinoContextMenuAction(
+                text='Выдать штраф',
+                trailing_icon=ft.icons.MONEY_OFF,
+                on_click=lambda e: self.show_snackbar('Выдан штраф (1000₽)', sstyle=error_style(size=15))
+            ),
+            ft.CupertinoContextMenuAction(
+                text='Уволить',
+                is_destructive_action=True,
+                trailing_icon=ft.icons.INDETERMINATE_CHECK_BOX,
+                on_click=lambda e: self.remove_callback(self.index)
+            ),
+        ]
 
     def create(self):
         return ft.CupertinoContextMenu(
             enable_haptic_feedback=True,
             content=ft.Container(
-                ft.TextButton(text=self.title),
-                width=200,
+                ft.Text(self.title, style=style(size=15)),
+                width=250,
                 height=150,
-                bgcolor='#f2f3fa',
+                bgcolor=colors['bg'],
+                shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=colors['block_shadow']),
                 alignment=ft.alignment.center,
                 border_radius=20,
                 padding=10,
             ),
-            actions=self.create_actions()
+            actions=self.generate_actions()
         )
 
-    def create_actions(self):
-        action_items = []
-        for action in self.actions:
-            action_items.append(
-                ft.CupertinoContextMenuAction(
-                    text=action['text'],
-                    is_default_action=action.get('is_default', False),
-                    is_destructive_action=action.get('is_destructive', False),
-                    trailing_icon=action.get('trailing_icon', ft.icons.MORE),
-                    on_click=action['callback']
-                )
-            )
-        return action_items
-
-
 def staff(page):
-    staff_list = [f'Сотрудник {i}' for i in range(1, 13)]  # Полный список сотрудников
 
-    lw = ft.ListView(spacing=10, width=360, first_item_prototype=True, height=635)
+    db = next(get_db())
+    staff_list = db.query(Staff).all()
+    lw = ft.ListView(spacing=10, width=360, height=635)
+
+    def tf_focus(e):
+        e.control.error_text = ''
+        employee_dialog.update()
+
+    def tf_blur(e):
+        if len(e.control.value.strip()) == 0:
+            e.control.error_text = 'Поле не должно быть пустым!'
+        elif 'Abc/Абв/-' in e.control.value:
+            e.control.value = ''
+        employee_dialog.update()
+
+    def textfield(purpose: str):
+        return ft.TextField(
+            cursor_color = 'black',
+            focused_color='black',
+            label=purpose,
+            width=300,
+            border_radius=10,
+            label_style=style(),
+            text_style=style(),
+            error_style=error_style(size=10),
+            adaptive=True,
+            border=ft.InputBorder.NONE,
+            fill_color=colors['bg'],
+            on_blur=tf_blur,
+            on_focus=tf_focus,
+            on_change=on_text_change
+        )
 
     def refresh_list_view():
-        lw.controls.clear()  # Очистим текущие элементы
-        for i, employee in enumerate(staff_list):
-            item = ContextMenuItem(title=employee, index=i, lw=lw, remove_callback=remove_employee, page=page).create()
-            lw.controls.append(item)  # Добавляем новые элементы
-        page.update()  # Обновляем страницу после обновления списка
-
-    def remove_employee(index):
-        def close_snack_bar(snack_bar):
-            snack_bar.open = False
-            page.update()
-
-        new_snack_bar = ft.SnackBar(ft.Text('Сотрудник удален'),
-                                    open=True, bgcolor='#36618e', duration=1000)
-        page.overlay.append(new_snack_bar)
+        sstaff_list = db.query(Staff).all()
+        lw.controls.clear()
+        for i, employee in enumerate(sstaff_list):
+            item = ContextMenuItem(f'{employee.last_name} ϟ {employee.position}', i, remove_employee, page).create()
+            lw.controls.append(item)
         page.update()
 
-        staff_list.pop(index)
+    def remove_employee(index):
+
         refresh_list_view()
 
-    page.window.width = 390
-    page.window.height = 844
-    page.window.always_on_top = True
-    page.window.maximizable = False
-    page.window.resizable = False
-    page.padding = 0
-    page.spacing = 0
-    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-    page.vertical_alignment = ft.MainAxisAlignment.CENTER
+        staff_list = db.query(Staff).all()
 
-    # Добавляем View на страницу
-    view = ft.View(
-        route='/user_mainscreen',
-        bgcolor='#000000',
-        vertical_alignment=ft.MainAxisAlignment.CENTER,
-        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-        controls=[ft.Container(height=150, opacity=0), lw],
+        if index < len(staff_list):
+            employee = staff_list[index]
+            db.delete(employee)
+            db.commit()
+
+            # Refresh the ListView after deleting
+            refresh_list_view()
+            show_snackbar('Сотрудник уволен')
+        else:
+            show_snackbar('Ошибка: Сотрудник не найден', sstyle=error_style(size=15))
+
+    def on_text_change(e):
+        if bool(re.search(r'\d', e.control.value)):
+            e.control.value = ''
+        employee_dialog.update()
+
+    def handle_add(e):
+        if len(name.value) > 1:
+            name.value = name.value.capitalize()
+            if len(last_name.value) > 1:
+                last_name.value = last_name.value.capitalize()
+                if len(patronymic.value) > 1:
+                    patronymic.value = patronymic.value.capitalize()
+                    if len(work_position.value) > 1:
+                        work_position.value = work_position.value.capitalize()
+
+                        page.close(employee_dialog)
+                        new_employee = Staff(first_name=name.value,
+                                             last_name=last_name.value,
+                                             position=work_position.value)
+
+                        db.add(new_employee)
+                        db.commit()
+                        db.refresh(new_employee)
+
+                        show_snackbar(f'Сотрудник {name.value} добавлен', sstyle=style(size=15))
+                        name.value, last_name.value, patronymic.value, work_position.value = '', '', '', ''
+                        refresh_list_view()
+
+    def handle_dissmiss(e):
+        page.close(employee_dialog)
+
+    name = textfield('Имя')
+    last_name = textfield('Фамилия')
+    patronymic = textfield('Отчество')
+    work_position = textfield('Должность')
+
+    employee_dialog = ft.AlertDialog(
+        modal=True,
+        bgcolor=colors['bg'],
+        title=ft.Text('Добавить сотрудника', style=style(size=15)),
+        content=ft.Column([name, last_name, patronymic, work_position], height=250),
+        actions=[
+            ft.Container(ft.Text('Да', style=style(size=15)),
+                         data=True, on_click=handle_add, alignment=ft.alignment.center, width=80, height=50),
+            ft.Container(ft.Text('Нет', style=error_style(size=15)),
+                         data=False, on_click=handle_dissmiss, alignment=ft.alignment.center, width=80, height=50),
+        ],
+        actions_alignment=ft.MainAxisAlignment.END,
     )
 
-    page.views.append(view)
+    def show_snackbar(message, sstyle=error_style(size=15)):
+        snackbar = ft.SnackBar(
+            ft.Container(ft.Text(message, style=sstyle), alignment=ft.alignment.center),
+            open=True, bgcolor=colors['bg'], duration=1000
+        )
+        page.overlay.append(snackbar)
+        page.update()
+
+    add_employee_btn = ft.IconButton(
+        icon=ft.Icons.ADD,
+        on_click=lambda e: page.open(employee_dialog),
+        style=ft.ButtonStyle(
+            shape=ft.RoundedRectangleBorder(radius=30),
+            bgcolor=colors['primary'],
+            color='black',
+        ),
+        width=60,
+        height=60,
+    )
+
     refresh_list_view()
 
-    return view
+    return ft.View(
+        route='/user_mainscreen',
+        bgcolor=colors['bg'],
+        vertical_alignment=ft.MainAxisAlignment.CENTER,
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        controls=[
+            ft.Container(height=150, opacity=0),
+            ft.Stack(
+                controls=[
+                    lw,
+                    ft.Container(add_employee_btn, padding=ft.padding.only(right=20, bottom=30))
+                ],
+                alignment=ft.alignment.bottom_right
+            )
+        ],
+    )

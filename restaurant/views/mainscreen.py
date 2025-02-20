@@ -41,12 +41,10 @@ def main_screen(page: ft.Page):
         ]
     )
 
-    dlg = ft.AlertDialog(barrier_color=ft.Colors.with_opacity(0.96, 'black'),
-                         title=ft.Text('мысли о смерти не сделали меня самураем', style=style(size=25)),
-                         content=ft.Text('github.com/xiseedeadpeople/6oxxa', style=style(size=15)),
-                         bgcolor=ft.Colors.with_opacity(0, '#080808'))
 
-
+    def open_repo(e):
+        ft.page.launch_url('https://github.com/xiseedeadpeople/6oxxa/tree/main/restaurant')
+    
     mybar = ft.Container(
         bgcolor=colors['bg'],
         border_radius=ft.border_radius.vertical(bottom=30),
@@ -57,9 +55,9 @@ def main_screen(page: ft.Page):
 
         content=ft.Column([
             ft.Row([ft.IconButton(icon=ft.Icons.CODE, icon_size=25, icon_color=colors['primary'],
-                                  on_click=lambda e: page.open(dlg)),
+                                  on_click=open_repo),
 
-                    ft.Text('солидный рестик✦₊ﾟ',
+                    ft.Text('6oxxa restaurant✦₊ﾟ',
                             style=style(color=colors['primary'],
                             shadowclr=colors['font_shadow'], size=20))]),
             mytab],

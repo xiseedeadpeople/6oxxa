@@ -92,7 +92,7 @@ def login_screen(page: ft.Page):
         border_radius=ft.border_radius.vertical(bottom=30),
         shadow=ft.BoxShadow(spread_radius=1, blur_radius=100, color=colors['block_shadow']),
         width=page.window.width, height=150, alignment=ft.alignment.center,
-        content=ft.Container(ft.Text('tellmewhy✦₊ﾟ', style=style(color=colors['primary'],
+        content=ft.Container(ft.Text('6oxxa restaurant✦₊ﾟ', style=style(color=colors['primary'],
                                                             shadowclr=colors['font_shadow'], size=20)))
     )
 

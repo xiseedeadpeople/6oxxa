@@ -43,7 +43,7 @@ def main_screen(page: ft.Page):
 
 
     def open_repo(e):
-        ft.page.launch_url('https://github.com/xiseedeadpeople/6oxxa/tree/main/restaurant')
+        page.launch_url('https://github.com/xiseedeadpeople/6oxxa/tree/main/restaurant')
     
     mybar = ft.Container(
         bgcolor=colors['bg'],

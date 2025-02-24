@@ -1,6 +1,7 @@
 import flet as ft
 import datetime
-from prefs.colors import colors, style, error_style
+from flight.prefs.colors import colors, style, error_style
+from flight.models import Session, Flight
 
 def flight_book(page: ft.Page):
     cities = [
@@ -137,12 +138,22 @@ def flight_book(page: ft.Page):
             on_change=handle_return_change)))
 
     def proverka(e):
-        # if tof.value == fromf.value:
-        #     tof.error_text = 'Города не должны совпадать!'
-        #     fromf.error_text = 'Города не должны совпадать!'
-        #
-        # else:
-        print(f'{fromf.value} - {tof.value} : {formatted_date} - {formatted_return_date}')
+        if tof.value == fromf.value:
+            tof.error_text = 'Города не должны совпадать!'
+            fromf.error_text = 'Города не должны совпадать!'
+        else:
+            # Save flight details to the database
+            session = Session()
+            new_flight = Flight(
+                from_city=fromf.value,
+                to_city=tof.value,
+                departure_date=datetime.datetime.strptime(formatted_date, '%d/%m/%Y'),
+                return_date=datetime.datetime.strptime(formatted_return_date, '%d/%m/%Y')
+            )
+            session.add(new_flight)
+            session.commit()
+            session.close()
+            print(f'{fromf.value} - {tof.value} : {formatted_date} - {formatted_return_date}')
 
     searchbtn = ft.Container(
         ft.Text('Найти билеты', style=style(), size=20), width=300, height=50,

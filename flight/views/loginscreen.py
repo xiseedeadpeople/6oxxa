@@ -1,4 +1,4 @@
-from prefs.colors import colors, style, error_style
+from prefs.stylesnhelpers import colors, style, error_style
 from prefs.fonts.fontlist import fonts
 import flet as ft
 
@@ -33,7 +33,7 @@ def login_screen(page: ft.Page):
     def format_phone(e):
         phone.error_text = ''
         new_value = (phone.value.replace(" ", "").replace("(", "")
-                     .replace(")", "").replace("-", ""))  # Убираем все ненужные символы
+                     .replace(")", "").replace("-", ""))
 
 
         if len(phone.value) > 9:
@@ -45,6 +45,8 @@ def login_screen(page: ft.Page):
 
     dlg = ft.AlertDialog(barrier_color=ft.Colors.with_opacity(0.96, 'black'),
                          title=ft.Text('pass: 123', style=style(color='blue', size=120, shadowclr='black',
+                                                                font_family='w')),
+                         content=ft.Text('admin pass: admin', style=style(color='yellow', size=60, shadowclr='black',
                                                                 font_family='w')),
                          bgcolor=ft.Colors.with_opacity(0, '#080808'),
                          alignment=ft.alignment.center)
@@ -112,12 +114,15 @@ def login_screen(page: ft.Page):
             password.error_text = 'Введите пароль'
             password.update()
 
-        elif password.value != '123':
+        elif password.value != '123' and password.value.lower() != 'admin':
             password.error_text = 'Неверный пароль!'
             password.update()
 
         elif password.value == '123' and len(phone.value) == 15:
             page.go("/user_mainscreen")
+
+        elif password.value.lower() == 'admin' and len(phone.value) == 15:
+            page.go("/admin_mainscreen")
 
     btn = ft.Container(
         ft.Text('Войти', style=style(), size=25),

@@ -2,10 +2,11 @@ import flet as ft
 
 from views.loginscreen import login_screen
 from views.mainscreen import main_screen
+from views.adminscreen import admin_screen
 
-from views.tabs.orders_history import ordrs_history
-from views.tabs.flight_book import flight_book
-from views.tabs.closest_flights import closest_flights
+from views.admin_tabs.admin_create import admin_create
+from views.admin_tabs.admin_delete import admin_delete
+from views.admin_tabs.admin_update import admin_update
 
 #   itertools , combinations_with_replacement
 #   concurrent.futures , ProcessPoolExecutor
@@ -30,14 +31,17 @@ def main(page: ft.Page):
         elif page.route == "/user_mainscreen":
             page.views.append(main_screen(page))
 
-        elif page.route == '/user_mainscreen/closest_flights':
-            page.views.append(closest_flights(page))
+        elif page.route == '/admin_mainscreen':
+            page.views.append(admin_screen(page))
 
-        elif page.route == '/user_mainscreen/ordrs_history':
-            page.views.append(ordrs_history(page))
+        elif page.route == '/admin_mainscreen/admin_create':
+            page.views.append(admin_create(page))
 
-        elif page.route == '/user_mainscreen/flight_book':
-            page.views.append(flight_book(page))
+        elif page.route == '/admin_mainscreen/admin_delete':
+            page.views.append(admin_delete(page))
+
+        elif page.route == '/admin_mainscreen/admin_update':
+            page.views.append(admin_update(page))
 
         page.update()
 

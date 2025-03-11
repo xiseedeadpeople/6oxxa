@@ -1,7 +1,8 @@
 import flet as ft
 from prefs.colors import colors, style
 from views.tabs.staff import staff
-
+import subprocess
+import sys
 
 def main_screen(page: ft.Page):
 
@@ -43,7 +44,13 @@ def main_screen(page: ft.Page):
 
 
     def open_repo(e):
-        page.launch_url('https://github.com/xiseedeadpeople/6oxxa/tree/main/restaurant')
+        url = 'https://github.com/xiseedeadpeople/6oxxa/tree/main/restaurant'
+        if sys.platform.startswith('win'):
+            subprocess.Popen(['start', 'chrome', url], shell=True)
+        elif sys.platform.startswith('darwin'):
+            subprocess.Popen(['open', '-a', 'Google Chrome', url])
+        else:
+            subprocess.Popen(['google-chrome', url])
     
     mybar = ft.Container(
         bgcolor=colors['bg'],
